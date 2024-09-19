@@ -1,6 +1,6 @@
 FROM phpswoole/swoole:4.8-php8.1
 
-ENV LIBRDKAFKA_VERSION v1.8.2 
+ENV LIBRDKAFKA_VERSION v1.8.2
 ENV BUILD_DEPS \
         autoconf \
         build-essential \
@@ -14,9 +14,9 @@ ENV BUILD_DEPS \
         inotify-tools
 
 RUN apt-get clean && apt-get update \
-        && apt-get install -y ${BUILD_DEPS} \ 
+        && apt-get install -y ${BUILD_DEPS} \
         && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
-        && docker-php-ext-install zip pgsql pdo_pgsql    
+        && docker-php-ext-install zip pgsql pdo_pgsql
 
 RUN cd /tmp \
     && git clone \
@@ -41,5 +41,5 @@ RUN sed -ri -e 's!;date.timezone =!date.timezone = "Europe/Athens"!g' /usr/local
 COPY dev /var/www
 RUN rm -Rf /var/www/server.php /var/www/Application /var/www/config /var/www/Infrastructure /var/www/vendor /var/www/.git*
 
-RUN composer install --ignore-platform-req=ext-rdkafka
+RUN composer install
 ENTRYPOINT vendor/bin/behat

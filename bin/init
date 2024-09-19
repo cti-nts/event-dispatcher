@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+set -e
+
+cp ops/envs/dev/comp/.dist.env ops/envs/dev/comp/.env
+cp ops/envs/prod/comp/.dist.env ops/envs/prod/comp/.env

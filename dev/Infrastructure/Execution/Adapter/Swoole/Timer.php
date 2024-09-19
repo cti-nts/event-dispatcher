@@ -1,13 +1,16 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Infrastructure\Execution\Adapter\Swoole;
 
 use Application\Execution\Timer as ApplicationTimer;
+use Swoole\Timer as SwooleTimer;
 
 class Timer implements ApplicationTimer
 {
     public function tick(int $intervalMs, callable $callback, array $params = []): int|bool
     {
-        return \Swoole\Timer::tick($intervalMs, $callback, $params);
+        return SwooleTimer::tick($intervalMs, $callback, $params);
     }
 }

@@ -1,42 +1,33 @@
-<?php declare(strict_types=1);
+<?php
 
-use Behat\Behat\Context\Context;
-use Behat\Gherkin\Node\PyStringNode;
-use Behat\Gherkin\Node\TableNode;
-use Behat\Behat\Tester\Exception\PendingException;
-use Assert\Assertion;
+declare(strict_types=1);
+
 use Assert\Assert;
-
-use Enqueue\RdKafka\RdKafkaContext;
-use Enqueue\RdKafka\RdKafkaTopic;
-use Enqueue\RdKafka\RdKafkaConsumer;
-use Enqueue\RdKafka\RdKafkaProducer;
-
+use Behat\Behat\Context\Context;
 use Behat\Testwork\Hook\Scope\BeforeSuiteScope;
+use Enqueue\RdKafka\RdKafkaConnectionFactory;
+use Enqueue\RdKafka\RdKafkaContext;
 
 /**
  * Defines application features from the specific context.
  */
 class DispatchEventContext implements Context
 {
-
-    const NEW_EVENT_INSERT_SQL = 'INSERT INTO event 
-        (name, "aggregate_id", "aggregate_version", data, "timestamp", "correlation_id", "user_id") 
+    final public const NEW_EVENT_INSERT_SQL = 'INSERT INTO event
+        (name, "aggregate_id", "aggregate_version", data, "timestamp", "correlation_id", "user_id")
         VALUES (:name, :aggregate_id, :aggregate_version, :data, :timestamp, :correlation_id, :user_id)';
 
-    const ALREADY_DISPATCHED_EVENT_INSERT_SQL = 'INSERT INTO event 
-        (name, "aggregate_id", "aggregate_version", data, "timestamp", "dispatched", "dispatched_at") 
+    final public const ALREADY_DISPATCHED_EVENT_INSERT_SQL = 'INSERT INTO event
+        (name, "aggregate_id", "aggregate_version", data, "timestamp", "dispatched", "dispatched_at")
         VALUES (:name, :aggregate_id, :aggregate_version, :data, :timestamp, true, :dispatched_at)';
-
 
     protected static RdKafkaContext $kafkaContext;
 
     protected string $eventChannelName;
 
-    protected PDO $con;
+    protected \PDO $con;
 
     protected int|string $lastEventId;
-
 
     /**
      * Initializes context.
@@ -47,29 +38,35 @@ class DispatchEventContext implements Context
      */
     public function __construct()
     {
-        $this->con = new PDO("pgsql:host=".getenv('STORE_DB_HOST').";dbname=".getenv('STORE_DB_NAME'), getenv('STORE_DB_USER'), getenv('STORE_DB_PASSWORD'));
+        $this->con = new \PDO(
+            "pgsql:host=" . getenv('STORE_DB_HOST') . ";port=" . (getenv('DB_PORT') ?: '5432') . ";dbname=" . getenv('STORE_DB_NAME'),
+            getenv('STORE_DB_USER'),
+            getenv('STORE_DB_PASSWORD')
+        );
         $stmt = $this->con->prepare('TRUNCATE TABLE "event"');
-        $stmt->execute(); 
+        $stmt->execute();
     }
 
-    protected function getFilterMatchingEventName(){
+    protected function getFilterMatchingEventName(): string
+    {
         $filterConfig = getenv('EVENT_FILTER');
         $parts = explode('|', $filterConfig);
-        if (count($parts)>1){
+        if (count($parts) > 1) {
             return $parts[1];
         }
+
         return 'arandomname';
     }
 
     /**
      * @BeforeSuite
      */
-    public static function createKafkaContext(BeforeSuiteScope $scope)
+    public static function createKafkaContext(BeforeSuiteScope $scope): void
     {
-        self::$kafkaContext = (new \Enqueue\RdKafka\RdKafkaConnectionFactory(
+        self::$kafkaContext = (new RdKafkaConnectionFactory(
             [
                 'global' => [
-                    'metadata.broker.list' => getenv('MESSAGE_BROKER_HOST').':'.getenv('MESSAGE_BROKER_PORT'),
+                    'metadata.broker.list' => getenv('MESSAGE_BROKER_HOST') . ':' . getenv('MESSAGE_BROKER_PORT'),
                     'group.id' => 'tester',
                 ],
                 'topic' => [
@@ -84,7 +81,7 @@ class DispatchEventContext implements Context
     /**
      * @Given The event channel is set
      */
-    public function theEventChannelIsSet()
+    public function theEventChannelIsSet(): void
     {
         $this->eventChannelName = getenv('EVENT_CHANNEL');
         Assert::that($this->eventChannelName)->notEmpty();
@@ -93,7 +90,7 @@ class DispatchEventContext implements Context
     /**
      * @When an event matching dispatcher filter is inserted in db
      */
-    public function anEventMatchingDispatcherFilterIsInsertedInDb()
+    public function anEventMatchingDispatcherFilterIsInsertedInDb(): void
     {
         $statement = $this->con->prepare(self::NEW_EVENT_INSERT_SQL);
         $statement->execute(
@@ -108,16 +105,16 @@ class DispatchEventContext implements Context
             ]
         );
         $this->lastEventId = $this->con->lastInsertId();
-
     }
 
     /**
      * @Then dispatcher should produce a message with event data on event channel
      */
-    public function dispatcherShouldProduceAMessageWithEventDataOnEventChannel()
+    public function dispatcherShouldProduceAMessageWithEventDataOnEventChannel(): void
     {
         $topic = self::$kafkaContext->createTopic($this->eventChannelName);
         $topic->setPartition(0);
+
         $consumer = self::$kafkaContext->createConsumer($topic);
         $message = $consumer->receive(10000);
         $consumer->acknowledge($message);
@@ -143,7 +140,7 @@ class DispatchEventContext implements Context
     /**
      * @When an event not matching dispatcher filter is inserted in db
      */
-    public function anEventNotMatchingDispatcherFilterIsInsertedInDb()
+    public function anEventNotMatchingDispatcherFilterIsInsertedInDb(): void
     {
         $statement = $this->con->prepare(self::NEW_EVENT_INSERT_SQL);
         $statement->execute(
@@ -163,10 +160,11 @@ class DispatchEventContext implements Context
     /**
      * @Then dispatcher should not produce a message with event data on event channel
      */
-    public function dispatcherShouldNotProduceAMessageWithEventDataOnEventChannel()
+    public function dispatcherShouldNotProduceAMessageWithEventDataOnEventChannel(): void
     {
         $topic = self::$kafkaContext->createTopic($this->eventChannelName);
         $topic->setPartition(0);
+
         $consumer = self::$kafkaContext->createConsumer($topic);
         $message = $consumer->receive(10000);
         Assert::that($message)->null();
@@ -175,11 +173,12 @@ class DispatchEventContext implements Context
     /**
      * @Then the event should be marked as dipatched in db
      */
-    public function theEventShouldBeMarkedAsDipatchedInDb()
+    public function theEventShouldBeMarkedAsDipatchedInDb(): void
     {
-        sleep(2);
+        sleep(1);
         $stmt = $this->con->prepare('SELECT "dispatched", "dispatched_at" FROM event where id = :id');
-        $stmt->execute(['id' => $this->lastEventId]); 
+        $stmt->execute(['id' => $this->lastEventId]);
+
         $data = $stmt->fetch();
 
         Assert::that($data['dispatched'])->true();
@@ -189,11 +188,12 @@ class DispatchEventContext implements Context
     /**
      * @Then the event should not be marked as dipatched in db
      */
-    public function theEventShouldNotBeMarkedAsDipatchedInDb()
+    public function theEventShouldNotBeMarkedAsDipatchedInDb(): void
     {
-        sleep(2);
+        sleep(1);
         $stmt = $this->con->prepare('SELECT "dispatched", "dispatched_at" FROM event where id = :id');
-        $stmt->execute(['id' => $this->lastEventId]); 
+        $stmt->execute(['id' => $this->lastEventId]);
+
         $data = $stmt->fetch();
 
         Assert::that($data['dispatched'])->false();
@@ -201,9 +201,9 @@ class DispatchEventContext implements Context
     }
 
     /**
-     * @When an already dispatcehd event is inserted in db
+     * @When an already dispatched event is inserted in db
      */
-    public function anAlreadyDispatcehdEventIsInsertedInDb()
+    public function anAlreadyDispatchedEventIsInsertedInDb(): void
     {
         $statement = $this->con->prepare(self::ALREADY_DISPATCHED_EVENT_INSERT_SQL);
         $statement->execute(
@@ -220,12 +220,13 @@ class DispatchEventContext implements Context
     }
 
     /**
-     * @Then the event dispatced datetime should not be altered
+     * @Then the event dispatched datetime should not be altered
      */
-    public function theEventDispatcedDatetimeShouldNotBeAltered()
+    public function theEventDispatchedDatetimeShouldNotBeAltered(): void
     {
         $stmt = $this->con->prepare('SELECT "dispatched_at" FROM event where id = :id');
-        $stmt->execute(['id' => $this->lastEventId]); 
+        $stmt->execute(['id' => $this->lastEventId]);
+
         $data = $stmt->fetch();
 
         Assert::that($data['dispatched_at'])->eq('2022-01-28 12:26:47.123456');
@@ -234,7 +235,7 @@ class DispatchEventContext implements Context
     /**
      * @Given we stop kafka
      */
-    public function weStopKafka()
+    public function weStopKafka(): void
     {
         echo "Stop the kafka container with `bin/env dev stop kafka` and then press any key to continue";
     }
@@ -242,12 +243,12 @@ class DispatchEventContext implements Context
     /**
      * @Given kafka is down
      */
-    public function kafkaIsDown()
+    public function kafkaIsDown(): void
     {
         // Disable canonical mode, so characters are available immediately
         system('stty -icanon');
         // Read a single character from the user
-        $input = fgetc(STDIN);
+        fgetc(STDIN);
         // Re-enable canonical mode
         system('stty icanon');
         echo "Assuming kafka is now stopped...\n";
@@ -256,7 +257,7 @@ class DispatchEventContext implements Context
     /**
      * @Then we start kafka
      */
-    public function weStartKafka()
+    public function weStartKafka(): void
     {
         echo "Start the kafka container with `bin/env dev up -d kafka` and then press any key to continue";
     }
@@ -264,15 +265,14 @@ class DispatchEventContext implements Context
     /**
      * @Then kafka is up
      */
-    public function kafkaIsUp()
+    public function kafkaIsUp(): void
     {
         // Disable canonical mode, so characters are available immediately
         system('stty -icanon');
         // Read a single character from the user
-        $input = fgetc(STDIN);
+        fgetc(STDIN);
         // Re-enable canonical mode
         system('stty icanon');
         echo "Assuming kafka is now started...\n";
     }
-
 }
