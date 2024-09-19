@@ -2,7 +2,7 @@ services:
   event-dispatcher:
     build: ../cont/event-dispatcher
     environment:
-      HOST_GID: ${HOST_UID}
+      HOST_GID: ${HOST_GID}
       HOST_UID: ${HOST_UID}
       HTTP_PORT: ${HTTP_PORT}
       TZ: ${TIME_ZONE}
@@ -21,23 +21,23 @@ services:
       STORE_DB_USER: ${STORE_DB_USER}
       STORE_DB_PASSWORD: ${STORE_DB_PASSWORD}
       STORE_DB_NAME: ${STORE_DB_NAME}
-    expose: 
-    - ${HTTP_PORT}
-    ports: 
-    - ${HTTP_PORT}:${HTTP_PORT}
+    expose:
+      - ${HTTP_PORT}
+    ports:
+      - ${HTTP_PORT}:${HTTP_PORT}
     volumes:
-    - ../../../../dev:/var/www
+      - ../../../../dev:/var/www
     depends_on:
       - kafka
       - db
   zookeeper:
     image: quay.io/strimzi/kafka:0.27.0-kafka-3.0.0
     command: [
-        "sh", "-c",
-        "bin/zookeeper-server-start.sh config/zookeeper.properties"
-      ]
+      "sh", "-c",
+      "bin/zookeeper-server-start.sh config/zookeeper.properties"
+    ]
     expose:
-    - 2181
+      - 2181
     environment:
       LOG_DIR: /tmp/logs
   kafka:
@@ -67,4 +67,3 @@ services:
       POSTGRES_HOST_AUTH_METHOD: trust
     expose:
       - 5432
-      

@@ -1,15 +1,16 @@
 #!/bin/bash
-PARENT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+
+PARENT_PATH=$(
+  cd "$(dirname "${BASH_SOURCE[0]}")"
+  pwd -P
+)
 
 TYPE=$1
 shift 1
 
-if [ "$TYPE" == "integration" ] || [ -z "$TYPE" ]
-then
-    $PARENT_PATH/env dev exec event-dispatcher vendor/bin/behat $@
+if [ "$TYPE" == "integration" ] || [ -z "$TYPE" ]; then
+  $PARENT_PATH/env dev exec event-dispatcher composer run behat -- $@
 fi
-if [ "$TYPE" == "unit" ] || [ -z "$TYPE" ]
-then
-    $PARENT_PATH/env dev exec event-dispatcher vendor/bin/phpunit $@ tests/unit
+if [ "$TYPE" == "unit" ] || [ -z "$TYPE" ]; then
+  $PARENT_PATH/env dev exec event-dispatcher composer run phpunit -- $@
 fi
-

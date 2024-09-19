@@ -2,7 +2,7 @@ services:
   event-dispatcher-1:
     build: ../cont/event-dispatcher
     environment:
-      HOST_GID: ${HOST_UID}
+      HOST_GID: ${HOST_GID}
       HOST_UID: ${HOST_UID}
       HTTP_PORT: ${HTTP_PORT}
       TZ: ${TIME_ZONE}
@@ -17,9 +17,9 @@ services:
       STORE_DB_USER: ${STORE_DB_USER}
       STORE_DB_PASSWORD: ${STORE_DB_PASSWORD}
       STORE_DB_NAME: ${STORE_DB_NAME}
-    expose: 
+    expose:
     - ${HTTP_PORT}
-    ports: 
+    ports:
     - 9501:${HTTP_PORT}
     volumes:
     - ../../../../dev:/var/www
@@ -29,7 +29,7 @@ services:
   event-dispatcher-2:
     build: ../cont/event-dispatcher
     environment:
-      HOST_GID: ${HOST_UID}
+      HOST_GID: ${HOST_GID}
       HOST_UID: ${HOST_UID}
       HTTP_PORT: ${HTTP_PORT}
       TZ: ${TIME_ZONE}
@@ -44,9 +44,9 @@ services:
       STORE_DB_USER: ${STORE_DB_USER}
       STORE_DB_PASSWORD: ${STORE_DB_PASSWORD}
       STORE_DB_NAME: ${STORE_DB_NAME}
-    expose: 
+    expose:
     - ${HTTP_PORT}
-    ports: 
+    ports:
     - 9502:${HTTP_PORT}
     volumes:
     - ../../../../dev:/var/www
@@ -56,7 +56,7 @@ services:
   event-dispatcher-3:
     build: ../cont/event-dispatcher
     environment:
-      HOST_GID: ${HOST_UID}
+      HOST_GID: ${HOST_GID}
       HOST_UID: ${HOST_UID}
       HTTP_PORT: ${HTTP_PORT}
       TZ: ${TIME_ZONE}
@@ -71,9 +71,9 @@ services:
       STORE_DB_USER: ${STORE_DB_USER}
       STORE_DB_PASSWORD: ${STORE_DB_PASSWORD}
       STORE_DB_NAME: ${STORE_DB_NAME}
-    expose: 
+    expose:
     - ${HTTP_PORT}
-    ports: 
+    ports:
     - 9503:${HTTP_PORT}
     volumes:
     - ../../../../dev:/var/www
@@ -195,4 +195,3 @@ services:
       POSTGRES_HOST_AUTH_METHOD: trust
     expose:
       - 5432
-      

@@ -1,9 +1,13 @@
 #!/bin/bash
 
-PARENT_PATH=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
-if [ ! -f composer.json ]; then
-    runuser -l hostuser -c "cp $PARENT_PATH/assets/composer.json composer.json"
-    runuser -l hostuser -c "composer require php-di/php-di doctrine/annotations"
-    runuser -l hostuser -c "composer require --dev phpunit/phpunit"
+PARENT_PATH=$(
+  cd "$(dirname "${BASH_SOURCE[0]}")"
+  pwd -P
+)
+
+if [[ $SKIP_COMPOSER_INSTALL -eq 1 ]]; then
+  echo "SKIP_COMPOSER_INSTALL is true. Skipping composer install."
+  return 0
 fi
-runuser -l hostuser -c "composer install --ignore-platform-req=ext-rdkafka"
+
+runuser -l hostuser -c "composer install"
