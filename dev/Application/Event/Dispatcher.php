@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Application\Event;
 
@@ -9,11 +11,11 @@ interface Dispatcher
 {
     public function __construct(Store $store, Producer $producer, Filter $filter, MessageBuilder $builder);
 
-    public function dispatch(array $eventData):bool;
-    
-    public function start():void;
+    public function dispatch(array $eventData): bool;
 
-    public function dispatchUndispatched():void;
+    public function start(): void;
 
-    public function pollProducer():void;
+    public function dispatchUndispatched(): void;
+
+    public function pollProducer(): void;
 }

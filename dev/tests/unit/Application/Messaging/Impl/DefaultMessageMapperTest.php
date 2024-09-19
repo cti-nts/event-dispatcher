@@ -1,29 +1,46 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Application\Messaging\Impl;
 
-use Infrastructure\Messaging\Adapter\EnqueueRdkafka\Message;
+use Application\Messaging\Message as ApplicationMessage;
 use Enqueue\RdKafka\RdKafkaMessage;
+use Infrastructure\Messaging\Adapter\EnqueueRdkafka\Message;
 use PHPUnit\Framework\TestCase;
-use Prophecy\PhpUnit\ProphecyTrait;
 
 class DefaultMessageMapperTest extends TestCase
 {
+    public function testShouldMapTheMessageToDataForDbInsert(): void
+    {
+        $mapper = new DefaultMessageMapper();
+        $actualMessage = $mapper->map(
+            data: $this->eventData(),
+            message: new Message(delegate: new RdKafkaMessage())
+        );
+        $this->assertEquals($this->expectedMessage(), $actualMessage);
+    }
 
-    protected function eventData(){
+    // @phpstan-ignore missingType.return
+    private function eventData()
+    {
         return [
             'id' => 27,
             'name' => 'eventName',
             'aggregate_id' => 12,
             'user_id' => 'testid',
-            'correlation_id' => 123,
+            'correlation_id' => '123',
             'aggregate_version' => 13,
-            'data' => ['key1' => 'value1', 'key2' => 'value2'],
+            'data' => [
+                'key1' => 'value1',
+                'key2' => 'value2'
+            ],
             'timestamp' => '2022-01-27 12:03:23.123456'
         ];
     }
 
-    protected function expectedMessage(){
+    private function expectedMessage(): ApplicationMessage
+    {
         return (new Message(delegate: new RdKafkaMessage()))
             ->withHeader(name: 'name', value: 'eventName')
             ->withHeader(name: 'aggregate_id', value: '12')
@@ -33,15 +50,6 @@ class DefaultMessageMapperTest extends TestCase
             ->withProperty(name: 'correlation_id', value: '123')
             ->withProperty(name: 'user_id', value: 'testid')
             ->withBody(body: '{"key1":"value1","key2":"value2"}')
-            ->withKey('12')
-        ;
-    }
-
-    
-
-    public function testShouldMapTheMessageToDataForDbInsert(){
-        $mapper = new DefaultMessageMapper();
-        $this->assertEquals($this->expectedMessage(), $mapper->map(data: $this->eventData(), message:new Message(delegate: new RdKafkaMessage()))
-        );
+            ->withKey('12');
     }
 }

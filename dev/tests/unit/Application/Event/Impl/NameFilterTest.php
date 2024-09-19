@@ -1,13 +1,15 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Application\Event\Impl;
 
 use PHPUnit\Framework\TestCase;
-use Prophecy\PhpUnit\ProphecyTrait;
 
 class NameFilterTest extends TestCase
 {
-    public function testShouldMatchEventsWithMatchingName(){
+    public function testShouldMatchEventsWithMatchingName(): void
+    {
         $sut = new NameFilter(['matching1', 'matching2']);
 
         $this->assertTrue($sut->matches([
@@ -15,7 +17,8 @@ class NameFilterTest extends TestCase
         ]));
     }
 
-    public function testShouldNotMatchEventsWithNotMatchingName(){
+    public function testShouldNotMatchEventsWithNotMatchingName(): void
+    {
         $sut = new NameFilter(['matching1', 'matching2']);
 
         $this->assertFalse($sut->matches([
@@ -23,9 +26,10 @@ class NameFilterTest extends TestCase
         ]));
     }
 
-    public function testShouldProvideAnSqlMatcher(){
+    public function testShouldProvideAnSqlMatcher(): void
+    {
         $sut = new NameFilter(['matching1', 'matching2']);
 
-        $this->assertEquals('NEW.name IN (\'matching1\',\'matching2\')', $sut->getSqlMatcher());
+        $this->assertEquals("NEW.name IN ('matching1','matching2')", $sut->getSqlMatcher());
     }
 }

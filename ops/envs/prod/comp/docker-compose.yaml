@@ -1,10 +1,10 @@
 services:
   event-dispatcher:
-    build: 
+    build:
       dockerfile: ops/envs/prod/cont/event-dispatcher/Dockerfile
-      context: ../../../../ 
+      context: ../../../../
     environment:
-      HOST_GID: ${HOST_UID}
+      HOST_GID: ${HOST_GID}
       HOST_UID: ${HOST_UID}
       HTTP_PORT: ${HTTP_PORT}
       TZ: ${TIME_ZONE}
@@ -13,11 +13,11 @@ services:
       EVENT_CHANNEL: ${EVENT_CHANNEL}
       EVENT_FILTER: ${EVENT_FILTER}
       MESSAGE_MAPPER: ${MESSAGE_MAPPER}
-      STORE_DB_HOST: db
+      STORE_DB_HOST: ${STORE_DB_HOST}
       STORE_DB_USER: ${STORE_DB_USER}
       STORE_DB_PASSWORD: ${STORE_DB_PASSWORD}
       STORE_DB_NAME: ${STORE_DB_NAME}
-    expose: 
-    - ${HTTP_PORT}
-    ports: 
-    - ${HTTP_PORT}:${HTTP_PORT}
+    expose:
+      - ${HTTP_PORT}
+    ports:
+      - ${HTTP_PORT}:${HTTP_PORT}
