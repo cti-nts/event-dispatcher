@@ -18,7 +18,7 @@ return $config
     ->setRules([
         // Sets
         '@PSR12' => true,
-        '@PHP82Migration' => true,
+        '@PHP83Migration' => true,
 
         // Rules
         // Each line of multi-line DocComments must have an asterisk [PSR-5] and must be aligned with the first one.

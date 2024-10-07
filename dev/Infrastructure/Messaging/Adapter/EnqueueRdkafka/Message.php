@@ -13,36 +13,43 @@ class Message implements ApplicationMessage
     {
     }
 
+    #[\Override]
     public function getBody(): string
     {
         return $this->delegate->getBody();
     }
 
+    #[\Override]
     public function getHeaders(): array
     {
         return $this->delegate->getHeaders();
     }
 
+    #[\Override]
     public function getHeader(string $name, mixed $default = null): mixed
     {
         return $this->delegate->getHeader(name: $name, default: $default);
     }
 
+    #[\Override]
     public function getProperties(): array
     {
         return $this->delegate->getProperties();
     }
 
+    #[\Override]
     public function getProperty(string $name, mixed $default = null): mixed
     {
         return $this->delegate->getProperty(name: $name, default: $default);
     }
 
+    #[\Override]
     public function getKey(): ?string
     {
         return $this->delegate->getKey();
     }
 
+    #[\Override]
     public function withBody(string $body): ApplicationMessage
     {
         $delegate = clone $this->delegate;
@@ -50,6 +57,7 @@ class Message implements ApplicationMessage
         return new Message($delegate);
     }
 
+    #[\Override]
     public function withHeader(string $name, mixed $value): ApplicationMessage
     {
         $delegate = clone $this->delegate;
@@ -57,6 +65,7 @@ class Message implements ApplicationMessage
         return new Message($delegate);
     }
 
+    #[\Override]
     public function withProperty(string $name, mixed $value): ApplicationMessage
     {
         $delegate = clone $this->delegate;
@@ -64,6 +73,7 @@ class Message implements ApplicationMessage
         return new Message($delegate);
     }
 
+    #[\Override]
     public function withoutHeader(string $name): ApplicationMessage
     {
         $delegate = clone $this->delegate;
@@ -73,6 +83,7 @@ class Message implements ApplicationMessage
         return new Message($delegate);
     }
 
+    #[\Override]
     public function withoutProperty(string $name): ApplicationMessage
     {
         $delegate = clone $this->delegate;
@@ -82,6 +93,7 @@ class Message implements ApplicationMessage
         return new Message($delegate);
     }
 
+    #[\Override]
     public function withKey(string $key): ApplicationMessage
     {
         $delegate = clone $this->delegate;

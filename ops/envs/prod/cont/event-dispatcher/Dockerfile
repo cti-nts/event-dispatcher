@@ -1,4 +1,4 @@
-FROM phpswoole/swoole:5.1-php8.2
+FROM phpswoole/swoole:5.1-php8.3
 
 ENV LIBRDKAFKA_VERSION 2.2.0
 

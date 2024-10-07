@@ -19,11 +19,13 @@ class Server implements HttpServer
         $this->delegate = new SwooleServer(host: '0.0.0.0', port: $port);
     }
 
+    #[\Override]
     public function start(): void
     {
         $this->delegate->start();
     }
 
+    #[\Override]
     public function on(string $eventName, callable $callback): void
     {
         $swooleCallbak = match ($eventName) {
@@ -38,6 +40,7 @@ class Server implements HttpServer
         $this->delegate->on(event_name: $eventName, callback: $swooleCallbak);
     }
 
+    #[\Override]
     public function addProcess(Process $process): bool
     {
         return (bool)$this->delegate->addProcess($process->getDelegate());

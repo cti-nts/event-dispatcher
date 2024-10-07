@@ -18,6 +18,7 @@ class MessageMapperNoUidSid implements MessageMapper
         }
     }
 
+    #[\Override]
     public function map(array $data, Message $message): Message
     {
         $res = $message->withBody(json_encode($data['data']))

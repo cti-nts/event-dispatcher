@@ -9,6 +9,7 @@ use Swoole\Timer as SwooleTimer;
 
 class Timer implements ApplicationTimer
 {
+    #[\Override]
     public function tick(int $intervalMs, callable $callback, array $params = []): int|bool
     {
         return SwooleTimer::tick($intervalMs, $callback, $params);

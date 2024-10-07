@@ -41,11 +41,13 @@ class Producer implements ApplicationProducer
         $producerProperty->setAccessible(false);
     }
 
+    #[\Override]
     public function setDeliverySuccessCallback(callable $callback): void
     {
         $this->deliverySuccessCallback = $callback;
     }
 
+    #[\Override]
     public function send(Message $message): void
     {
         $kafkaMessage = $this->context->createMessage(
@@ -58,6 +60,7 @@ class Producer implements ApplicationProducer
         $this->delegate->send(destination: $this->topic, message: $kafkaMessage);
     }
 
+    #[\Override]
     public function poll(int $timeoutMs): void
     {
         $this->vendorProducer->poll($timeoutMs);

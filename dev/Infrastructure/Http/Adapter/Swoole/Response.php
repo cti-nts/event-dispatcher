@@ -13,11 +13,13 @@ class Response implements HttpResponse
     {
     }
 
+    #[\Override]
     public function end(?string $content = null): void
     {
         $this->delegate->end(content: $content);
     }
 
+    #[\Override]
     public function header(string $key, string $value): void
     {
         $this->delegate->header(key: $key, value: $value);

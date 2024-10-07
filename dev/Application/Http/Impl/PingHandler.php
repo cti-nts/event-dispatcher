@@ -10,6 +10,7 @@ use Application\Http\Response;
 
 class PingHandler implements Handler
 {
+    #[\Override]
     public function handle(Request $request, Response $response): void
     {
         $response->header(key: 'Content-Type', value: 'application/json');

@@ -13,11 +13,11 @@ use Enqueue\RdKafka\RdKafkaContext;
  */
 class DispatchEventContext implements Context
 {
-    final public const NEW_EVENT_INSERT_SQL = 'INSERT INTO event
+    final public const string NEW_EVENT_INSERT_SQL = 'INSERT INTO event
         (name, "aggregate_id", "aggregate_version", data, "timestamp", "correlation_id", "user_id")
         VALUES (:name, :aggregate_id, :aggregate_version, :data, :timestamp, :correlation_id, :user_id)';
 
-    final public const ALREADY_DISPATCHED_EVENT_INSERT_SQL = 'INSERT INTO event
+    final public const string ALREADY_DISPATCHED_EVENT_INSERT_SQL = 'INSERT INTO event
         (name, "aggregate_id", "aggregate_version", data, "timestamp", "dispatched", "dispatched_at")
         VALUES (:name, :aggregate_id, :aggregate_version, :data, :timestamp, true, :dispatched_at)';
 

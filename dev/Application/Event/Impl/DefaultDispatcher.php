@@ -21,6 +21,7 @@ class DefaultDispatcher implements Dispatcher
         $this->producer->setDeliverySuccessCallback($store->dispatchSuccessCallback(...));
     }
 
+    #[\Override]
     public function dispatch(array $eventData): bool
     {
         if (!$this->filter->matches(eventData: $eventData)) {
@@ -32,6 +33,7 @@ class DefaultDispatcher implements Dispatcher
         return true;
     }
 
+    #[\Override]
     public function start(): void
     {
         echo "Listening for pgsql notifications...\n";
@@ -40,11 +42,13 @@ class DefaultDispatcher implements Dispatcher
         }
     }
 
+    #[\Override]
     public function dispatchUndispatched(): void
     {
         $this->store->dispatchAllUndispatched(dispatcher: $this);
     }
 
+    #[\Override]
     public function pollProducer(): void
     {
         $this->producer->poll(0);

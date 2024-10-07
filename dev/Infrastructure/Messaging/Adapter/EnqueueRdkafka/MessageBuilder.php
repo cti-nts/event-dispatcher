@@ -14,6 +14,7 @@ class MessageBuilder implements ApplicationMessageBuilder
     {
     }
 
+    #[\Override]
     public function build(array $data): Message
     {
         $message = new Message(new RdKafkaMessage());

@@ -59,6 +59,7 @@ class Store implements EventStore
         }
     }
 
+    #[\Override]
     public function listen(Dispatcher $dispatcher): void
     {
         if (!$this->listenerSetUp) {
@@ -81,6 +82,7 @@ class Store implements EventStore
         $this->dispatch(eventData: $eventData, dispatcher: $dispatcher);
     }
 
+    #[\Override]
     public function dispatchAllUndispatched(Dispatcher $dispatcher): void
     {
         $filterMatcher = str_replace(
@@ -140,6 +142,7 @@ class Store implements EventStore
         }
     }
 
+    #[\Override]
     public function dispatchSuccessCallback(string $eventId): void
     {
         $statement = $this->con->prepare(self::UPDATE_EVENT_SQL);
