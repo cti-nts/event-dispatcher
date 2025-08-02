@@ -1,6 +1,6 @@
 FROM phpswoole/swoole:5.1.8-php8.3
 
-ENV LIBRDKAFKA_VERSION=2.8.0
+ENV LIBRDKAFKA_VERSION=2.12.1
 
 ENV BUILD_DEPS="libpcre3-dev libzip-dev libpq-dev"
 
