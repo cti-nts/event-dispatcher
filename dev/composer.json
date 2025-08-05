@@ -1,5 +1,6 @@
 {
   "name": "evdobe/event-dispatcher",
+  "version": "6.0.0",
   "description": "A process that listens to notifications from an event store and publishes new events to a messaging channel.",
   "authors": [
     {
