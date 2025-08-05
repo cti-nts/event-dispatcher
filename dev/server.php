@@ -17,6 +17,9 @@ use Application\Messaging\Producer as MessagingProducer;
 use DI\Container;
 use DI\ContainerBuilder;
 
+// Timer interval in milliseconds
+const DEFAULT_DISPATCH_INTERVAL_MS = 2 * 60 * 1000;
+
 $builder = new ContainerBuilder();
 $builder->addDefinitions('config/di.php');
 $container = $builder->build();
@@ -60,7 +63,9 @@ $httpServer->on(
         echo "Checking for undispatched events...\n";
         $eventDispatcher->dispatchUndispatched();
 
-        $timer->tick(2 * 60 * 1000, function () use ($eventDispatcher) {
+        $dispatchIntervalMs = (int)(getenv('DISPATCH_INTERVAL_MS') ?: DEFAULT_DISPATCH_INTERVAL_MS);
+
+        $timer->tick($dispatchIntervalMs, function () use ($eventDispatcher) {
             echo "Periodically checking for undispatched events...\n";
             $eventDispatcher->dispatchUndispatched();
             sleep(1);
