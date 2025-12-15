@@ -36,10 +36,8 @@ class Producer implements ApplicationProducer
         $this->delegate = $this->context->createProducer();
 
         $producerProperty = (new ReflectionObject($this->delegate))->getProperty('producer');
-        $producerProperty->setAccessible(true);
 
         $this->vendorProducer = $producerProperty->getValue($this->delegate);
-        $producerProperty->setAccessible(false);
     }
 
     public function setDeliverySuccessCallback(callable $callback): void
