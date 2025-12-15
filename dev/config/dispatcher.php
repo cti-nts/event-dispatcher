@@ -23,7 +23,7 @@ $eventFilterStr = getenv('EVENT_FILTER');
 $eventFilterConfig = null;
 
 if (!empty($eventFilterStr)) {
-    $eventFilterConfigParts = array_map(fn (string $row) => trim($row), explode('|', $eventFilterStr));
+    $eventFilterConfigParts = array_map(trim(...), explode('|', $eventFilterStr));
     $eventFilterClassName = array_shift($eventFilterConfigParts);
     $eventFilterConfig = [
         'class' => $eventFilterClassName ?: Filter::class,
@@ -32,7 +32,7 @@ if (!empty($eventFilterStr)) {
 }
 
 $messageMapperStr = getenv('MESSAGE_MAPPER');
-$messageMapperConfigParts = array_map(fn (string $row) => trim($row), explode('|', $messageMapperStr));
+$messageMapperConfigParts = array_map(trim(...), explode('|', $messageMapperStr));
 $messageMapperClassName = array_shift($messageMapperConfigParts);
 $messageMapperConfig = [
     'class' => $messageMapperClassName ?: MessageMapper::class,
