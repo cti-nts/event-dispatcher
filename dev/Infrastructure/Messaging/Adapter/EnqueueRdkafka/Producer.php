@@ -73,13 +73,19 @@ class Producer implements ApplicationProducer
 
     private function deliveryReportCallback(VendorProducer $kafka, VendorMessage $message): void
     {
-        if ($message->err || $message->key === null || !isset($this->pendingDeliveries[$message->key])) {
+        if ($message->key === null || !isset($this->pendingDeliveries[$message->key])) {
             return;
         }
 
         $id = $this->pendingDeliveries[$message->key];
-        unset($this->pendingDeliveries[$message->key]);
 
+        if ($message->err) {
+            error_log("Failed to deliver event {$id} to Kafka: error code {$message->err}");
+            unset($this->pendingDeliveries[$message->key]);
+            return;
+        }
+
+        unset($this->pendingDeliveries[$message->key]);
         echo "Successfully dispatched event with id " . $id . "\n";
 
         if ($this->deliverySuccessCallback !== null) {
