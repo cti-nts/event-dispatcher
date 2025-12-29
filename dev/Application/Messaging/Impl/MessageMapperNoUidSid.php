@@ -33,7 +33,7 @@ class MessageMapperNoUidSid implements MessageMapper
             ->withHeader('name', (string)$data['name'])
             ->withHeader('aggregate_id', (string)$data['aggregate_id'])
             ->withHeader('aggregate_version', (string)$data['aggregate_version'])
-            ->withKey($data[$this->keyAttr]);
+            ->withKey((string)$data[$this->keyAttr]);
 
         if (!empty($data['correlation_id'])) {
             return $res->withProperty('correlation_id', (string)$data['correlation_id']);
