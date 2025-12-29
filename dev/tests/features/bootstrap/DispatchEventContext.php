@@ -41,8 +41,39 @@ class DispatchEventContext implements Context
     {
         $dsn = "pgsql:host=" . getenv('STORE_DB_HOST') . ";port=" . (getenv('DB_PORT') ?: '5432') . ";dbname=" . getenv('STORE_DB_NAME');
         $this->con = new \PDO($dsn, getenv('STORE_DB_USER'), getenv('STORE_DB_PASSWORD'));
+    }
+
+    /**
+     * @BeforeScenario
+     */
+    public function cleanupBeforeScenario(): void
+    {
+        // Drain Kafka messages first
+        $this->drainKafkaTopic();
+
+        // Then truncate database
         $stmt = $this->con->prepare('TRUNCATE TABLE event');
         $stmt->execute();
+    }
+
+    private function drainKafkaTopic(): void
+    {
+        if (!isset(self::$kafkaContext) || !getenv('EVENT_CHANNEL')) {
+            return;
+        }
+
+        $topic = self::$kafkaContext->createTopic(getenv('EVENT_CHANNEL'));
+        $topic->setPartition(0);
+
+        $consumer = self::$kafkaContext->createConsumer($topic);
+
+        for ($i = 0; $i < 100; $i++) {
+            if ($consumer->receive(100) === null) {
+                break;
+            }
+
+            $consumer->acknowledge($consumer->receive(100));
+        }
     }
 
     /**
@@ -160,7 +191,16 @@ class DispatchEventContext implements Context
      */
     public function theEventShouldBeMarkedAsDipatchedInDb(): void
     {
-        usleep(500_000);
+        // Wait for async delivery callback
+        for ($i = 0; $i < 20; $i++) {
+            usleep(250_000);
+            $stmt = $this->con->prepare('SELECT dispatched FROM event WHERE id = :id');
+            $stmt->execute(['id' => $this->lastEventId]);
+            if ($stmt->fetch()['dispatched'] === true) {
+                return;
+            }
+        }
+
         $stmt = $this->con->prepare('SELECT dispatched, dispatched_at FROM event WHERE id = :id');
         $stmt->execute(['id' => $this->lastEventId]);
 
