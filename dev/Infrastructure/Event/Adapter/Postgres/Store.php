@@ -48,12 +48,35 @@ class Store implements EventStore
 
     public function __construct(protected readonly ?Filter $filter = null, protected readonly bool $setupListener = false)
     {
-        $dsn = "pgsql:host=" . getenv('STORE_DB_HOST') . ";port=" . (getenv('DB_PORT') ?: '5432') . ";dbname=" . getenv('STORE_DB_NAME');
+        // Validate required environment variables
+        $host = getenv('STORE_DB_HOST');
+        $dbName = getenv('STORE_DB_NAME');
+        $user = getenv('STORE_DB_USER');
+        $password = getenv('STORE_DB_PASSWORD');
+
+        if ($host === false || $host === '') {
+            throw new Exception('Missing required environment variable: STORE_DB_HOST');
+        }
+
+        if ($dbName === false || $dbName === '') {
+            throw new Exception('Missing required environment variable: STORE_DB_NAME');
+        }
+
+        if ($user === false || $user === '') {
+            throw new Exception('Missing required environment variable: STORE_DB_USER');
+        }
+
+        if ($password === false) {
+            throw new Exception('Missing required environment variable: STORE_DB_PASSWORD');
+        }
+
+        $port = getenv('DB_PORT') ?: '5432';
+        $dsn = "pgsql:host={$host};port={$port};dbname={$dbName}";
 
         $this->con = new PDO(
             $dsn,
-            getenv('STORE_DB_USER'),
-            getenv('STORE_DB_PASSWORD'),
+            $user,
+            $password,
             [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
