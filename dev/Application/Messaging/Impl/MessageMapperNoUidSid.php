@@ -7,6 +7,7 @@ namespace Application\Messaging\Impl;
 use Application\Messaging\Message;
 use Application\Messaging\MessageMapper;
 use DateTimeImmutable;
+use InvalidArgumentException;
 
 class MessageMapperNoUidSid implements MessageMapper
 {
@@ -21,7 +22,12 @@ class MessageMapperNoUidSid implements MessageMapper
 
     public function map(array $data, Message $message): Message
     {
-        $res = $message->withBody(json_encode($data['data']))
+        $body = json_encode($data['data']);
+        if ($body === false) {
+            throw new InvalidArgumentException("Failed to encode event data: " . json_last_error_msg());
+        }
+
+        $res = $message->withBody($body)
             ->withProperty('timestamp', (new DateTimeImmutable((string)$data['timestamp']))->format('Y-m-d H:i:s.u'))
             ->withProperty('id', (string)$data['id'])
             ->withHeader('name', (string)$data['name'])

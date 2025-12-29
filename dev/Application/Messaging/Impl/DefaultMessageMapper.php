@@ -33,7 +33,12 @@ class DefaultMessageMapper implements MessageMapper
             throw new InvalidArgumentException("Missing key attribute: {$this->keyAttr}");
         }
 
-        $res = $message->withBody(json_encode($data['data']))
+        $body = json_encode($data['data']);
+        if ($body === false) {
+            throw new InvalidArgumentException("Failed to encode event data: " . json_last_error_msg());
+        }
+
+        $res = $message->withBody($body)
             ->withProperty('timestamp', $data['timestamp'])
             ->withProperty('id', (string)$data['id'])
             ->withHeader('name', (string)$data['name'])
