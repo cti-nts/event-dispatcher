@@ -112,6 +112,12 @@ class Store implements EventStore
         }
 
         $eventData['data'] = json_decode((string)$eventData['data'], true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            error_log("JSON decode error for event {$eventId}: " . json_last_error_msg());
+            return;
+        }
+
         echo "Received notification for event with id " . $eventData['id'] . "\n";
         $this->dispatch(eventData: $eventData, dispatcher: $dispatcher);
     }
@@ -135,6 +141,12 @@ class Store implements EventStore
 
             foreach ($batch as $eventData) {
                 $eventData['data'] = json_decode((string)$eventData['data'], true);
+
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    error_log("JSON decode error for event {$eventData['id']}: " . json_last_error_msg());
+                    continue;
+                }
+
                 echo "Dispatching undispatched event with id " . $eventData['id'] . "\n";
                 $this->dispatch(eventData: $eventData, dispatcher: $dispatcher);
 

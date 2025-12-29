@@ -65,6 +65,17 @@ class Producer implements ApplicationProducer
     private function deliveryReportCallback(VendorProducer $kafka, VendorMessage $message): void
     {
         $payload = json_decode($message->payload, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            error_log("JSON decode error in delivery report: " . json_last_error_msg());
+            return;
+        }
+
+        if (!isset($payload['properties']['id'])) {
+            error_log("Missing event ID in delivery report payload");
+            return;
+        }
+
         $id = $payload['properties']['id'];
 
         if ($message->err) {
