@@ -80,6 +80,44 @@ class Store implements EventStore
 
     public function dispatchAllUndispatched(Dispatcher $dispatcher): void
     {
+        $batchSize = (int)(getenv('POLLING_DB_BATCH_SIZE') ?: '100');
+        $maxEvents = (int)(getenv('POLLING_DB_SELECT_LIMIT') ?: '10000');
+        $processedCount = 0;
+        $lastId = 0;
+
+        echo "Starting batch processing (batch size: {$batchSize}, max: {$maxEvents})...\n";
+
+        while ($processedCount < $maxEvents) {
+            $batch = $this->fetchUndispatchedBatch($lastId, $batchSize);
+
+            if ($batch === []) {
+                echo "No more undispatched events found.\n";
+                break;
+            }
+
+            foreach ($batch as $eventData) {
+                $eventData['data'] = json_decode((string)$eventData['data'], true);
+                echo "Dispatching undispatched event with id " . $eventData['id'] . "\n";
+                $this->dispatch(eventData: $eventData, dispatcher: $dispatcher);
+
+                $lastId = max($lastId, (int)$eventData['id']);
+                $processedCount++;
+            }
+
+            // Allow Kafka producer to poll between batches
+            $dispatcher->pollProducer();
+
+            echo "Processed {$processedCount} events so far...\n";
+        }
+
+        echo "Batch processing complete. Total: {$processedCount}\n";
+    }
+
+    /**
+     * Fetch a batch of undispatched events using cursor-based pagination.
+     */
+    protected function fetchUndispatchedBatch(int $lastId, int $limit): array
+    {
         $filterMatcher = str_replace(
             "%%filter_matcher%%",
             $this->getFilterMatcher(),
@@ -87,16 +125,21 @@ class Store implements EventStore
         );
         $query = str_replace(
             "%%polling_select_limit%%",
-            getenv('POLLING_DB_SELECT_LIMIT') ?: '10000',
+            (string)$limit,
             $filterMatcher
         );
-        $data = $this->con->query($query, PDO::FETCH_ASSOC)->fetchAll();
 
-        foreach ($data as $eventData) {
-            $eventData['data'] = json_decode((string)$eventData['data'], true);
-            echo "Dispatching undispatched event with id " . $eventData['id'] . "\n";
-            $this->dispatch(eventData: $eventData, dispatcher: $dispatcher);
-        }
+        // Add cursor-based pagination
+        $query = str_replace(
+            "WHERE NEW.dispatched = false",
+            "WHERE NEW.dispatched = false AND NEW.id > :last_id",
+            $query
+        );
+
+        $stmt = $this->con->prepare($query);
+        $stmt->execute(['last_id' => $lastId]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     protected function getFilterMatcher(): string
