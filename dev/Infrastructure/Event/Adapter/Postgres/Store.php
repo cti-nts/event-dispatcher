@@ -72,7 +72,12 @@ class Store implements EventStore
         $stmt = $this->con->prepare("SELECT * FROM event WHERE id = :id");
         $stmt->execute(['id' => $eventId]);
 
-        $eventData = $stmt->fetch();
+        $eventData = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$eventData) {
+            error_log("Event {$eventId} not found in database");
+            return;
+        }
+
         $eventData['data'] = json_decode((string)$eventData['data'], true);
         echo "Received notification for event with id " . $eventData['id'] . "\n";
         $this->dispatch(eventData: $eventData, dispatcher: $dispatcher);
