@@ -30,6 +30,27 @@ class NameFilterTest extends TestCase
     {
         $sut = new NameFilter(['matching1', 'matching2']);
 
-        $this->assertEquals("NEW.name IN ('matching1','matching2')", $sut->getSqlMatcher());
+        $this->assertEquals("NEW.name = ANY(ARRAY['matching1','matching2'])", $sut->getSqlMatcher());
+    }
+
+    public function testShouldReturnNullForEmptyNames(): void
+    {
+        $sut = new NameFilter([]);
+
+        $this->assertNull($sut->getSqlMatcher());
+    }
+
+    public function testShouldEscapeSingleQuotesInNames(): void
+    {
+        $sut = new NameFilter(["name'with'quotes"]);
+
+        $this->assertEquals("NEW.name = ANY(ARRAY['name''with''quotes'])", $sut->getSqlMatcher());
+    }
+
+    public function testShouldEscapeBackslashesInNames(): void
+    {
+        $sut = new NameFilter(["name\\with\\backslash"]);
+
+        $this->assertEquals("NEW.name = ANY(ARRAY['name\\\\with\\\\backslash'])", $sut->getSqlMatcher());
     }
 }

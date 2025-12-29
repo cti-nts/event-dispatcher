@@ -22,6 +22,23 @@ class NameFilter implements Filter
 
     public function getSqlMatcher(): ?string
     {
-        return "NEW.name IN ('" . implode("','", $this->names) . "')";
+        if ($this->names === []) {
+            return null;
+        }
+
+        // Use PostgreSQL's quote_literal equivalent by escaping single quotes
+        // and wrapping in dollar-quoted strings for maximum safety
+        $quotedNames = array_map(
+            function (string $name): string {
+                // Escape single quotes by doubling them
+                $escaped = str_replace("'", "''", $name);
+                // Also escape backslashes to prevent escape sequence attacks
+                $escaped = str_replace('\\', '\\\\', $escaped);
+                return "'{$escaped}'";
+            },
+            $this->names
+        );
+
+        return "NEW.name = ANY(ARRAY[" . implode(",", $quotedNames) . "])";
     }
 }
