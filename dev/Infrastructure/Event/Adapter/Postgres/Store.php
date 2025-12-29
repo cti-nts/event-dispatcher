@@ -140,7 +140,27 @@ class Store implements EventStore
 
     public function dispatchSuccessCallback(string $eventId): void
     {
-        $statement = $this->con->prepare(self::UPDATE_EVENT_SQL);
-        $statement->execute(['id' => $eventId]);
+        try {
+            $this->con->beginTransaction();
+
+            $statement = $this->con->prepare(self::UPDATE_EVENT_SQL);
+            $statement->execute(['id' => $eventId]);
+
+            // Verify the update actually affected a row
+            if ($statement->rowCount() === 0) {
+                $this->con->rollBack();
+                throw new Exception("Failed to update event {$eventId}: event not found or already dispatched");
+            }
+
+            $this->con->commit();
+        } catch (PDOException $e) {
+            if ($this->con->inTransaction()) {
+                $this->con->rollBack();
+            }
+
+            // Log the error but don't crash - the event is already in Kafka
+            error_log("Failed to mark event {$eventId} as dispatched: " . $e->getMessage());
+            throw $e;
+        }
     }
 }
