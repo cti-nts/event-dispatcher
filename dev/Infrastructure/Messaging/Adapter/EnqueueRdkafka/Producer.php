@@ -27,6 +27,9 @@ class Producer implements ApplicationProducer
 
     private readonly VendorProducer $vendorProducer;
 
+    /** @var array<string, string> Map of message keys to event IDs */
+    private array $pendingDeliveries = [];
+
     public function __construct(protected readonly array $config, protected readonly string $channel)
     {
         $config['dr_msg_cb'] = $this->deliveryReportCallback(...);
@@ -54,6 +57,12 @@ class Producer implements ApplicationProducer
         );
         $kafkaMessage->setKey($message->getKey());
 
+        // Store the event ID mapped to the message key for delivery callback
+        $eventId = $message->getProperty('id');
+        if ($eventId !== null) {
+            $this->pendingDeliveries[$message->getKey()] = (string)$eventId;
+        }
+
         $this->delegate->send(destination: $this->topic, message: $kafkaMessage);
     }
 
@@ -64,27 +73,17 @@ class Producer implements ApplicationProducer
 
     private function deliveryReportCallback(VendorProducer $kafka, VendorMessage $message): void
     {
-        $payload = json_decode($message->payload, true);
-
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            error_log("JSON decode error in delivery report: " . json_last_error_msg());
+        if ($message->err || $message->key === null || !isset($this->pendingDeliveries[$message->key])) {
             return;
         }
 
-        if (!isset($payload['properties']['id'])) {
-            error_log("Missing event ID in delivery report payload");
-            return;
-        }
+        $id = $this->pendingDeliveries[$message->key];
+        unset($this->pendingDeliveries[$message->key]);
 
-        $id = $payload['properties']['id'];
+        echo "Successfully dispatched event with id " . $id . "\n";
 
-        if ($message->err) {
-            var_dump("Message with id " . $id . " failed to be delivered");
-        } else {
-            echo "Successfully dispatched event with id " . $id . "\n";
-            if ($this->deliverySuccessCallback !== null) {
-                ($this->deliverySuccessCallback)($id);
-            }
+        if ($this->deliverySuccessCallback !== null) {
+            ($this->deliverySuccessCallback)($id);
         }
     }
 }

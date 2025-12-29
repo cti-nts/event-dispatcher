@@ -242,7 +242,8 @@ class Store implements EventStore
             // Verify the update actually affected a row
             if ($statement->rowCount() === 0) {
                 $this->con->rollBack();
-                throw new Exception("Failed to update event {$eventId}: event not found or already dispatched");
+                error_log("Event {$eventId} not found or already dispatched, skipping update");
+                return;
             }
 
             $this->con->commit();
