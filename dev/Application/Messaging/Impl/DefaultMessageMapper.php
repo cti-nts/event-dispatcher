@@ -6,6 +6,7 @@ namespace Application\Messaging\Impl;
 
 use Application\Messaging\Message;
 use Application\Messaging\MessageMapper;
+use InvalidArgumentException;
 
 class DefaultMessageMapper implements MessageMapper
 {
@@ -20,6 +21,18 @@ class DefaultMessageMapper implements MessageMapper
 
     public function map(array $data, Message $message): Message
     {
+        // Validate required fields
+        $required = ['id', 'name', 'aggregate_id', 'aggregate_version', 'data', 'timestamp'];
+        foreach ($required as $field) {
+            if (!isset($data[$field])) {
+                throw new InvalidArgumentException("Missing required field: {$field}");
+            }
+        }
+
+        if (!isset($data[$this->keyAttr])) {
+            throw new InvalidArgumentException("Missing key attribute: {$this->keyAttr}");
+        }
+
         $res = $message->withBody(json_encode($data['data']))
             ->withProperty('timestamp', $data['timestamp'])
             ->withProperty('id', (string)$data['id'])
