@@ -27,10 +27,10 @@ class Server implements HttpServer
     public function on(string $eventName, callable $callback): void
     {
         $swooleCallback = match ($eventName) {
-            'start' => function (/* SwooleServer $server */) use ($callback) {
+            'start' => function (/* SwooleServer $server */) use ($callback): void {
                 $callback($this);
             },
-            'request' => function (SwooleRequest $request, SwooleResponse $response) use ($callback) {
+            'request' => function (SwooleRequest $request, SwooleResponse $response) use ($callback): void {
                 $callback(new Request($request), new Response($response));
             },
             default => $callback

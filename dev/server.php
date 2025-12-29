@@ -29,7 +29,7 @@ $dispatcherFactory = new DispatcherFactory($container, $dispatcherConfig);
 $process = $container->make(
     Process::class,
     [
-        'callback' => function (/* $process */) use ($dispatcherFactory) {
+        'callback' => function (/* $process */) use ($dispatcherFactory): void {
             echo "Starting process...\n";
 
             $eventDispatcher = $dispatcherFactory->create(setupListener: true);
@@ -46,7 +46,7 @@ $timer = $container->get(Timer::class);
 
 $httpServer->on(
     'start',
-    function (/* HttpServer $httpServer */) use ($dispatcherFactory, $timer) {
+    function (/* HttpServer $httpServer */) use ($dispatcherFactory, $timer): void {
         $eventDispatcher = $dispatcherFactory->create(setupListener: false);
 
         echo "Checking for undispatched events...\n";
@@ -54,7 +54,7 @@ $httpServer->on(
 
         $dispatchIntervalMs = (int)(getenv('DISPATCH_INTERVAL_MS') ?: DEFAULT_DISPATCH_INTERVAL_MS);
 
-        $timer->tick($dispatchIntervalMs, function () use ($eventDispatcher) {
+        $timer->tick($dispatchIntervalMs, function () use ($eventDispatcher): void {
             echo "Periodically checking for undispatched events...\n";
             $eventDispatcher->dispatchUndispatched();
             sleep(1);
@@ -66,7 +66,7 @@ $httpServer->on(
 
 $httpServer->on(
     'request',
-    function (HttpRequest $request, HttpResponse $response) use ($httpHandler) {
+    function (HttpRequest $request, HttpResponse $response) use ($httpHandler): void {
         $httpHandler->handle($request, $response);
     }
 );
