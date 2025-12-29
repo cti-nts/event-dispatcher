@@ -43,7 +43,8 @@ class Store implements EventStore
     ";
 
     protected const SELECT_UNDISPATCHED_EVENTS_SQL = "
-        SELECT * FROM event AS NEW WHERE NEW.dispatched = false %%filter_matcher%% ORDER BY id LIMIT %%polling_select_limit%%;
+        SELECT id, name, aggregate_id, aggregate_version, data, timestamp, correlation_id, user_id
+        FROM event AS NEW WHERE NEW.dispatched = false %%filter_matcher%% ORDER BY id LIMIT %%polling_select_limit%%;
     ";
 
     public function __construct(protected readonly ?Filter $filter = null, protected readonly bool $setupListener = false)
@@ -102,7 +103,9 @@ class Store implements EventStore
         }
 
         $eventId = $notification['payload'];
-        $stmt = $this->con->prepare("SELECT * FROM event WHERE id = :id");
+        $stmt = $this->con->prepare(
+            "SELECT id, name, aggregate_id, aggregate_version, data, timestamp, correlation_id, user_id FROM event WHERE id = :id"
+        );
         $stmt->execute(['id' => $eventId]);
 
         $eventData = $stmt->fetch(PDO::FETCH_ASSOC);
