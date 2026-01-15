@@ -36,4 +36,5 @@ RUN \
   ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
   echo ${TZ} > /etc/timezone && \
   mv "${PHP_INI_DIR}/php.ini-development" "${PHP_INI_DIR}/php.ini" && \
+  grep -q ";date.timezone =" "${PHP_INI_DIR}/php.ini" && \
   sed -ri -e "s!;date.timezone =!date.timezone = \"${TZ}\"!g" "${PHP_INI_DIR}/php.ini"

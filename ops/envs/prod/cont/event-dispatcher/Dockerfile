@@ -36,5 +36,7 @@ RUN \
   ln -snf /usr/share/zoneinfo/${TZ} /etc/localtime && \
   echo ${TZ} > /etc/timezone && \
   mv "${PHP_INI_DIR}/php.ini-production" "${PHP_INI_DIR}/php.ini" && \
+  grep -q ";date.timezone =" "${PHP_INI_DIR}/php.ini" && \
+  grep -q "memory_limit = 128M" "${PHP_INI_DIR}/php.ini" && \
   sed -ri -e "s!;date.timezone =!date.timezone = \"${TZ}\"!g" -e 's!memory_limit = 128M!memory_limit = 256M!g' "${PHP_INI_DIR}/php.ini" && \
   composer install --no-ansi --no-cache --no-dev --no-interaction --no-progress --optimize-autoloader
