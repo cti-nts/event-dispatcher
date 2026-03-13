@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# shellcheck enable=require-variable-braces disable=SC1091
+# shellcheck disable=SC1091
 
-set -eo pipefail
+set -euo pipefail
 
 PARENT_PATH=$(
   cd "$(dirname "${BASH_SOURCE[0]}")"
@@ -10,6 +10,6 @@ PARENT_PATH=$(
 )
 
 source "${PARENT_PATH}/../lib.sh"
-source "${PARENT_PATH}/build.sh"
 
-eval "${COMPOSE_COMMAND} start $*"
+run_docker_compose build "$@"
+run_docker_compose start "$@"

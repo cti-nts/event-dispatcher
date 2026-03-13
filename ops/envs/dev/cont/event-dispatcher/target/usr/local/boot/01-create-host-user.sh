@@ -1,24 +1,22 @@
 #!/bin/bash
 
-# shellcheck enable=require-variable-braces disable=SC1091
-
 set -eo pipefail
 
-if [[ -z "${HOST_UID}" ]]; then
-  echo "ERROR: please set HOST_UID" >&2
+if [[ -z "${HOST_UID:-}" ]]; then
+  echo "ERROR: please set the HOST_UID environment variable" >&2
   exit 1
 fi
 
-if [[ -z "${HOST_GID}" ]]; then
-  echo "ERROR: please set HOST_GID" >&2
+if [[ -z "${HOST_GID:-}" ]]; then
+  echo "ERROR: please set the HOST_GID environment variable" >&2
   exit 1
 fi
 
-if grep -q '^hostuser:' /etc/passwd; then
+if getent passwd hostuser >/dev/null 2>&1; then
   userdel hostuser
 fi
 
-if grep -q 'hostgroup' /etc/group; then
+if getent group hostgroup >/dev/null 2>&1; then
   groupdel hostgroup
 fi
 

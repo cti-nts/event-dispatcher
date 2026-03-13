@@ -1,10 +1,8 @@
 #!/bin/bash
 
-# shellcheck enable=require-variable-braces
+set -euo pipefail
 
-set -eo pipefail
-
-if [[ -z "${ENVIRONMENT}" ]]; then
-  ENVIRONMENT=$1
+if [[ -z "${ENVIRONMENT:-}" ]]; then
+  readonly ENVIRONMENT=${1:-}
   shift 1 || true
 fi

@@ -1,14 +1,16 @@
-
 --
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 9.6.24
--- Dumped by pg_dump version 9.6.24
+\restrict kTGqzfaVyzheH5FZ1iYeqLCHNOykHCna6ctbo9iwe5Csc4IsgR2XmsNVg73n8NL
+
+-- Dumped from database version 17.7 (Debian 17.7-3.pgdg13+1)
+-- Dumped by pg_dump version 17.7 (Debian 17.7-3.pgdg13+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
+SET transaction_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -19,7 +21,7 @@ SET row_security = off;
 
 SET default_tablespace = '';
 
-SET default_with_oids = false;
+SET default_table_access_method = heap;
 
 --
 -- Name: event; Type: TABLE; Schema: public; Owner: adbuser
@@ -27,10 +29,10 @@ SET default_with_oids = false;
 
 CREATE TABLE public.event (
     id integer NOT NULL,
-    "name" text NOT NULL,
+    name text NOT NULL,
     channel text DEFAULT NULL,
-    correlation_id text DEFAULT NULL,
-    user_id text DEFAULT NULL,
+    user_id text,
+    correlation_id text,
     aggregate_id integer NOT NULL,
     aggregate_version integer NOT NULL,
     data jsonb NOT NULL,
@@ -56,7 +58,7 @@ CREATE SEQUENCE public.event_id_seq
     CACHE 1;
 
 
-ALTER TABLE public.event_id_seq OWNER TO adbuser;
+ALTER SEQUENCE public.event_id_seq OWNER TO adbuser;
 
 --
 -- Name: event_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: adbuser
@@ -84,3 +86,4 @@ ALTER TABLE ONLY public.event
 -- PostgreSQL database dump complete
 --
 
+\unrestrict kTGqzfaVyzheH5FZ1iYeqLCHNOykHCna6ctbo9iwe5Csc4IsgR2XmsNVg73n8NL

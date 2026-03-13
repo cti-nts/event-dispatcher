@@ -1,14 +1,30 @@
 #!/bin/bash
 
-# shellcheck enable=require-variable-braces
+set -euo pipefail
 
-set -eo pipefail
+show_help() {
+  cat << EOF
+Usage: ./bin/php [PHP_ARGS...]
+
+Run PHP commands inside the dev event-dispatcher container.
+
+Examples:
+  ./bin/php -v                      Show PHP version
+  ./bin/php script.php              Run a PHP script
+  ./bin/php -r "echo phpinfo();"    Execute PHP code
+EOF
+}
+
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+  show_help
+  exit 0
+fi
 
 PARENT_PATH=$(
   cd "$(dirname "${BASH_SOURCE[0]}")"
   pwd -P
 )
 
-cmd=$(printf '%q ' "php $*")
+cmd=$(printf '%q ' php "$@")
 
 "${PARENT_PATH}/env" dev exec -T event-dispatcher runuser --preserve-environment hostuser -c "${cmd}"
