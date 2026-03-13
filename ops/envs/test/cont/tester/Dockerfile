@@ -9,7 +9,7 @@ ENV PHP_EXT="zip pgsql pdo_pgsql"
 RUN \
   set -ex && \
   apt-get update && \
-  apt-get install -y ${BUILD_DEPS} && \
+  apt-get install -y --no-install-recommends ${BUILD_DEPS} && \
   docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql && \
   docker-php-ext-install -j$(nproc) ${PHP_EXT} && \
   rm -rf /var/lib/apt/lists/*
